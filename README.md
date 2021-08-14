@@ -6,7 +6,7 @@ Reference to the API: https://github.com/aunyks/newton-api
 
 # The Math Operation Custom Object
 
-If you want to use these Apex classes in your org successfully you will need to create the custom object with the following ccriteria:
+If you want to use these Apex classes in your org you will need to create the custom object with the following ccriteria:
 
 - API Name: Math_Operation__c
  - Fields:
