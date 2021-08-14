@@ -1,0 +1,64 @@
+@isTest
+public class NewtonApp_NewtonMathsIntegrationTest {
+
+    @isTest static void ShouldFailWhenInvalidOperation(){
+        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('dsadsad','2^2+2(2)');
+		System.assertEquals('Invalid operation', result);
+    }
+    
+    @isTest static void ShouldFailWhenInvalidExpression(){
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        
+        mock.setStaticResource('GetNewtonOperationResource');
+        mock.setStatusCode(500);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('area','54534543');
+		System.assertEquals('Ups, something went wrong, try again.', result);
+    }
+    
+    @isTest static void ShouldReturnCorrectResultForFactor(){
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        
+        mock.setStaticResource('GetNewtonOperationFactorResource');
+        mock.setStatusCode(200);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('factor','x^2 + 2x');
+        
+		System.assertEquals('x (x + 2)', result);
+    }
+    
+    @isTest static void ShouldReturnCorrectResultForSimplify(){
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        
+        mock.setStaticResource('GetNewtonOperationSimplifyResource');
+        mock.setStatusCode(200);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('simplify','2^2+2(2)');
+        
+		System.assertEquals('8', result);
+    }
+    
+    @isTest static void ShouldReturnCorrectResultForArea(){
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        
+        mock.setStaticResource('GetNewtonOperationAreaResource');
+        mock.setStatusCode(200);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('area','2:4lx^3');
+        
+		System.assertEquals('60', result);
+    }
+    
+}
