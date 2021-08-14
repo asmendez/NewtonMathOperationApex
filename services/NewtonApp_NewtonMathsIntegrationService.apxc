@@ -1,0 +1,65 @@
+public class NewtonApp_NewtonMathsIntegrationService {
+
+	private static HttpResponse getOperationCallout(string endpoint) {
+        
+        Http http = new Http();
+        
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(endpoint);
+        request.setMethod('GET');
+        
+        HttpResponse response = http.send(request);  
+        
+        System.debug(response.getBody());
+        
+        return response;
+    }
+    
+    public enum ValidNewtonOperation {simplify, factor, derive, integrate, zeroes, tangent, area, cos, sin, tan, arccos, arcsin, arctan, abs, log}
+    
+    private static boolean validateOperation(string operation){
+        
+        for (ValidNewtonOperation op: ValidNewtonOperation.values()) {
+            if (op.name() == operation) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static string getOperationResult(string operation, string expression){
+        
+        if(!validateOperation(operation)){
+            return 'Invalid operation';
+        }
+        
+        string endpoint = 'https://newton.vercel.app/api/v2/' + operation + '/' + EncodingUtil.urlEncode(expression,'UTF-8');
+        
+        HttpResponse response = getOperationCallout(endpoint);
+        
+        // If the request is successful, parse the JSON response.
+        if(response.getStatusCode() == 200) {
+            // Deserializes the JSON string into primitive data type.
+            NewtonApp_NewtonApiResponseDto result = (NewtonApp_NewtonApiResponseDto) JSON.deserialize(response.getBody(), NewtonApp_NewtonApiResponseDto.class);
+            
+            return result.Result;
+        }
+        
+        return 'Ups, something went wrong, try again.';
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static void setMathOperationResultForLastFiveOperations(){
+        
+      // Get the 5 newest MathOpperation
+      Math_Operation__c[] newMathOperations = [SELECT Id, Expression__c, Operation_Type__c  FROM Math_Operation__c ORDER BY CreatedDate DESC LIMIT 5];
+      // loop through them and update the Result field
+      for (Math_Operation__c op : newMathOperations) {
+          op.Math_Operation_Result__c = getOperationResult(op.Operation_Type__c, op.Expression__c);
+      }
+      // save the change you made
+      update newMathOperations;
+    }
+}
