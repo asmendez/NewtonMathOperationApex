@@ -42,9 +42,9 @@ Once you have all the classes imported to your organization in the developer con
  1. Click in Debug > Open Execute Anonymous Windows
  2. Write the following code and click Execute (you can select Open log uf you want)
 
-// Get the 5 newest MathOpperation
-Math_Operation__c[] newMathOperations = [SELECT Id, Expression__c, Operation_Type__c  FROM Math_Operation__c ORDER BY CreatedDate DESC LIMIT 5];
-// Call the Apex class method
+// Get the 5 newest MathOpperation 
+Math_Operation__c[] newMathOperations = [SELECT Id, Expression__c, Operation_Type__c FROM Math_Operation__c ORDER BY CreatedDate DESC LIMIT 5]; 
+// Call the Apex class method 
 NewtonApp_NewtonMathsIntegrationService.setMathOperationResultForLastFiveOperations(newMathOperations);
 
 3. Navigate to the Newton Maths app
