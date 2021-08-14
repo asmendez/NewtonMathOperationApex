@@ -51,10 +51,7 @@ public class NewtonApp_NewtonMathsIntegrationService {
     }
     
     @AuraEnabled(cacheable=true)
-    public static void setMathOperationResultForLastFiveOperations(){
-        
-      // Get the 5 newest MathOpperation
-      Math_Operation__c[] newMathOperations = [SELECT Id, Expression__c, Operation_Type__c  FROM Math_Operation__c ORDER BY CreatedDate DESC LIMIT 5];
+    public static void setMathOperationResultForLastFiveOperations(Math_Operation__c[] newMathOperations){        
       // loop through them and update the Result field
       for (Math_Operation__c op : newMathOperations) {
           op.Math_Operation_Result__c = getOperationResult(op.Operation_Type__c, op.Expression__c);
