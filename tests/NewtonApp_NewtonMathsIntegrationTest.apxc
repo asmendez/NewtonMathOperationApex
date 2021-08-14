@@ -61,4 +61,16 @@ public class NewtonApp_NewtonMathsIntegrationTest {
 		System.assertEquals('60', result);
     }
     
+    @isTest static void ShouldCorrectlyExecuteMethod(){
+        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+        
+        mock.setStaticResource('GetNewtonOperationAreaResource');
+        mock.setStatusCode(200);
+        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        
+        Test.setMock(HttpCalloutMock.class, mock);
+        
+        NewtonApp_NewtonMathsIntegrationService.setMathOperationResultForLastFiveOperations();
+    }
+    
 }
