@@ -34,7 +34,7 @@ If you want to use these Apex classes in your org you will need to create the cu
 
 In your Salesforce organization you must create the Math Operations tab for the Math Operation custom object. Then you can create a new App that will include that tab. The app for the purpose of this demo is called Newton Maths.
 
-For the purpose of this demo you should create at least one Math Operation record.
+For the purpose of this demo you should create at least one Math Operation record. You must consider the Newton APIquirement for Expressions: 
 
 # How to execute the Apex class
 
