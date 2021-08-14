@@ -1,76 +1,64 @@
-@isTest
-public class NewtonApp_NewtonMathsIntegrationTest {
+public class NewtonApp_NewtonMathsIntegrationService {
 
-    @isTest static void ShouldFailWhenInvalidOperation(){
-        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('dsadsad','2^2+2(2)');
-		System.assertEquals('Invalid operation', result);
+	private static HttpResponse getOperationCallout(string endpoint) {
+        
+        Http http = new Http();
+        
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint(endpoint);
+        request.setMethod('GET');
+        
+        HttpResponse response = http.send(request);  
+        
+        System.debug(response.getBody());
+        
+        return response;
     }
     
-    @isTest static void ShouldFailWhenInvalidExpression(){
-        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+    public enum ValidNewtonOperation {simplify, factor, derive, integrate, zeroes, tangent, area, cos, sin, tan, arccos, arcsin, arctan, abs, log}
+    
+    private static boolean validateOperation(string operation){
         
-        mock.setStaticResource('GetNewtonOperationResource');
-        mock.setStatusCode(500);
-        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        for (ValidNewtonOperation op: ValidNewtonOperation.values()) {
+            if (op.name() == operation) {
+                return true;
+            }
+        }
         
-        Test.setMock(HttpCalloutMock.class, mock);
-        
-        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('area','54534543');
-		System.assertEquals('Ups, something went wrong, try again.', result);
+        return false;
     }
     
-    @isTest static void ShouldReturnCorrectResultForFactor(){
-        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
+    @AuraEnabled(cacheable=true)
+    public static string getOperationResult(string operation, string expression){
         
-        mock.setStaticResource('GetNewtonOperationFactorResource');
-        mock.setStatusCode(200);
-        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
+        if(!validateOperation(operation)){
+            return 'Invalid operation';
+        }
         
-        Test.setMock(HttpCalloutMock.class, mock);
+        string endpoint = 'https://newton.vercel.app/api/v2/' + operation + '/' + EncodingUtil.urlEncode(expression,'UTF-8');
         
-        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('factor','x^2 + 2x');
+        HttpResponse response = getOperationCallout(endpoint);
         
-		System.assertEquals('x (x + 2)', result);
+        // If the request is successful, parse the JSON response.
+        if(response.getStatusCode() == 200) {
+            // Deserializes the JSON string into primitive data type.
+            NewtonApp_NewtonApiResponseDto result = (NewtonApp_NewtonApiResponseDto) JSON.deserialize(response.getBody(), NewtonApp_NewtonApiResponseDto.class);
+            
+            return result.Result;
+        }
+        
+        return 'Ups, something went wrong, try again.';
     }
     
-    @isTest static void ShouldReturnCorrectResultForSimplify(){
-        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
-        
-        mock.setStaticResource('GetNewtonOperationSimplifyResource');
-        mock.setStatusCode(200);
-        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        
-        Test.setMock(HttpCalloutMock.class, mock);
-        
-        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('simplify','2^2+2(2)');
-        
-		System.assertEquals('8', result);
+    @AuraEnabled(cacheable=true)
+    public static void setMathOperationResultForLastFiveOperations(Math_Operation__c[] newMathOperations){   
+        if(newMathOperations !=null){
+          // loop through them and update the Result field
+          for (Math_Operation__c op : newMathOperations) {
+              op.Math_Operation_Result__c = getOperationResult(op.Operation_Type__c, op.Expression__c);
+          }
+          // save the change you made
+          update newMathOperations;
+        }
     }
-    
-    @isTest static void ShouldReturnCorrectResultForArea(){
-        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
-        
-        mock.setStaticResource('GetNewtonOperationAreaResource');
-        mock.setStatusCode(200);
-        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        
-        Test.setMock(HttpCalloutMock.class, mock);
-        
-        string result = NewtonApp_NewtonMathsIntegrationService.getOperationResult('area','2:4lx^3');
-        
-		System.assertEquals('60', result);
-    }
-    
-    @isTest static void ShouldCorrectlyExecuteMethod(){
-        StaticResourceCalloutMock mock = new StaticResourceCalloutMock();
-        
-        mock.setStaticResource('GetNewtonOperationAreaResource');
-        mock.setStatusCode(200);
-        mock.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        
-        Test.setMock(HttpCalloutMock.class, mock);
-        
-        NewtonApp_NewtonMathsIntegrationService.setMathOperationResultForLastFiveOperations();
-    }
-    
 }
