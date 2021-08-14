@@ -40,7 +40,7 @@ For the purpose of this demo you should create at least one Math Operation recor
 
 Once you have all the classes imported to your organization in the developer console go ahead and follow these steps:
  1. Click in Debug > Open Execute Anonymous Windows
- 2. Write the following code and click Execute (you can select Open log uf you want)
+ 2. Write the following code and click Execute (you can select Open log if you want and click in Only Debug later)
 
 // Get the 5 newest MathOpperation
 
